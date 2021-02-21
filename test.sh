@@ -32,4 +32,12 @@ assert 20 "((10*10)+(10*10))/10"
 assert 2 "-1+2-3+4"
 assert 0 "(-5)+(+5)"
 
+assert 1 "1==1"
+assert 0 "1!=1"
+assert 1 "1<2"
+assert 1 "1<=2"
+assert 1 "2>1"
+assert 1 "2>=1"
+assert 1 "(1*1+5)/100 == 1*0"
+
 echo OK
