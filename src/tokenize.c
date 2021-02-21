@@ -50,7 +50,7 @@ void expect(char *op){
     strlen(op) != token->len ||
     memcmp(token->str, op, token->len)
   ){
-    error_at(token->str, "'%c'ではありません", op);
+    error_at(token->str, "'%s'ではありません", op);
   }
   token = token->next;
 }
@@ -66,13 +66,21 @@ int expect_number(){
   return val;
 }
 
+char expect_ident() {
+  if (token->kind != TK_IDENT) {
+    error_at(token->str, "ローカル変数ではありません");
+  }
+  char ident = token->str[0];
+  token = token->next;
+  return ident;
+}
+
 // 新しいtokenを作成してcursorにつなげる
-static Token *new_token(TokenKind kind, Token *cur, char *str, int len){
-  Token *tok = calloc(len, sizeof(Token)); // 動的にメモリ確保し、値を０初期化
+static Token *new_token(TokenKind kind, char *str, int len){
+  Token *tok = calloc(1, sizeof(Token)); // 動的にメモリ確保し、値を０初期化
   tok->kind = kind;
   tok->str = str;
   tok->len = len;
-  cur->next = tok;
   return tok;
 }
 
@@ -85,38 +93,43 @@ Token *tokenize(){
 
   while(*p){
     // 空白文字　スキップ
-    if(isspace(*p)){
+    if (isspace(*p)) {
       p++;
       continue;
     }
 
-    if(
-      memcmp(p, "==", strlen("==")) == 0 ||
-      memcmp(p, "!=", strlen("!=")) == 0 ||
-      memcmp(p, "<=", strlen("<=")) == 0 ||
-      memcmp(p, ">=", strlen(">=")) == 0 
-    ){
-      cur = new_token(TK_RESERVED, cur, p, 2);
-      p += 2;
-      continue;
-    }  
-
-    if(strchr("+-*/()<>", *p)){
-      cur = new_token(TK_RESERVED, cur, p++, 1); //代入してからp進める
-      continue;
-    }
-
-    if(isdigit(*p)){
-      cur = new_token(TK_NUM, cur, p, 0);
+    if (isdigit(*p)) {
+      cur = cur->next = new_token(TK_NUM, p, 0); // valとlenは後で代入
       char *q = p;
       cur->val = strtol(p, &p, 10);
       cur->len = p - q;
       continue;
     }
 
+    if ('a' <= *p && *p <= 'z') {
+      cur = cur->next = new_token(TK_IDENT, p++, 1);
+      continue;
+    }
+
+    if (
+      memcmp(p, "==", strlen("==")) == 0 ||
+      memcmp(p, "!=", strlen("!=")) == 0 ||
+      memcmp(p, "<=", strlen("<=")) == 0 ||
+      memcmp(p, ">=", strlen(">=")) == 0 
+    ){
+      cur = cur->next = new_token(TK_RESERVED, p, 2);
+      p += 2;
+      continue;
+    }
+
+    if (strchr("+-*/()<>=;", *p)) {
+      cur = cur->next = new_token(TK_RESERVED, p++, 1); //代入してからp進める
+      continue;
+    }
+
     error_at(p, "tokenizeできません");
   }
 
-  new_token(TK_EOF, cur, p, 0);
+  cur = cur->next = new_token(TK_EOF, p, 0);
   return head.next;
 }

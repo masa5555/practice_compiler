@@ -15,7 +15,17 @@ static Node *new_node_num(int val) {
   return node;
 }
 
-Node *expr();
+static Node *new_node_val(char ident) {
+  Node *node = calloc(1, sizeof(Node));
+  node->kind = ND_LVAR;
+  node->offset = (ident - 'a' + 1) * 8;
+  return node;
+}
+
+void *program();
+static Node *statement();
+static Node *expr();
+static Node *assign();
 static Node *equality();
 static Node *relational();
 static Node *add();
@@ -23,9 +33,34 @@ static Node *mul();
 static Node *unary();
 static Node *primary();
 
-// expr = equality
-Node *expr() {
-  return equality();
+// program = statement*
+void *program() {
+  int i = 0;
+  while (token->kind != TK_EOF) {
+    code[i++] = statement();
+  }
+  code[i] = NULL;
+}
+
+// statement = expr ";"
+static Node *statement() {
+  Node *node = expr();
+  expect(";");
+  return node;
+}
+
+// expr = assign
+static Node *expr() {
+  return assign();
+}
+
+// assign = equality ("=" assign)?
+static Node *assign() {
+  Node *node = equality();
+  if (consume("=")) {
+    node = new_node(ND_ASSIGN, node, assign());
+  }
+  return node;
 }
 
 // equality = relational ("==" relational | "!=" relational)*
@@ -42,6 +77,7 @@ static Node *equality() {
     }
   }
 }
+
 // relational = add ('<' add | "<=" add | ">" add | ">=" add)*
 static Node *relational() {
   Node *node = add();
@@ -102,12 +138,18 @@ static Node *unary() {
   return primary();
 }
 
-// primary = "(" expr ")" | num
+// primary = "(" expr ")" | ident | num
 static Node *primary() {
   if (consume("(")) {
     Node *node = expr();
     expect(")");
     return node;
   }
+
+  if (token->kind == TK_IDENT) {
+    Node *node = new_node_val(expect_ident());
+    return node;
+  }
+
   return new_node_num(expect_number());
 }

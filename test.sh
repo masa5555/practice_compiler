@@ -17,27 +17,35 @@ assert(){
 	fi
 }
 
-assert 0 0
-assert 42 42
+assert 0 "0;"
+assert 42 "42 ;"
 
-assert 0 "1+2-3"
+assert 0 "1+2-3 ;"
 
-assert 0 " 12 + 1 - 13 "
+assert 0 " 12 + 1 - 13 ;"
 
-assert 5 "1+2*2"
-assert 6 "5/1 + 1"
-assert 5 "(0*5)+(1*5)"
-assert 20 "((10*10)+(10*10))/10"
+assert 5 "1+2*2 ;"
+assert 6 "5/1 + 1 ;"
+assert 5 "(0*5)+(1*5) ;"
+assert 20 "((10*10)+(10*10))/10 ;"
 
-assert 2 "-1+2-3+4"
-assert 0 "(-5)+(+5)"
+assert 2 "-1+2-3+4 ;"
+assert 0 "(-5)+(+5) ;"
 
-assert 1 "1==1"
-assert 0 "1!=1"
-assert 1 "1<2"
-assert 1 "1<=2"
-assert 1 "2>1"
-assert 1 "2>=1"
-assert 1 "(1*1+5)/100 == 1*0"
+assert 1 "1==1 ;"
+assert 0 "1!=1 ;"
+assert 1 "1<2 ;"
+assert 1 "1<=2 ;"
+assert 1 "2>1 ;"
+assert 1 "2>=1 ;"
+assert 1 "(1*1+5)/100 == 1*0 ;"
+
+assert 3 "1; 2; 3;"
+assert 1 "a = 1; a;"
+assert 4 "a = 4; c = 100; a;"
+assert 55 "a = d = 55; a;"
+
+assert 100 "a = 4; d = 5; c = 100; d = c; d;"
+assert 104 "a = 4; c = 100; a + c;"
 
 echo OK
