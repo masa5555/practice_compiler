@@ -66,15 +66,6 @@ int expect_number(){
   return val;
 }
 
-char expect_ident() {
-  if (token->kind != TK_IDENT) {
-    error_at(token->str, "ローカル変数ではありません");
-  }
-  char ident = token->str[0];
-  token = token->next;
-  return ident;
-}
-
 // 新しいtokenを作成してcursorにつなげる
 static Token *new_token(TokenKind kind, char *str, int len){
   Token *tok = calloc(1, sizeof(Token)); // 動的にメモリ確保し、値を０初期化
@@ -107,7 +98,13 @@ Token *tokenize(){
     }
 
     if ('a' <= *p && *p <= 'z') {
-      cur = cur->next = new_token(TK_IDENT, p++, 1);
+      char *start = p;
+      int len = 0;
+      do {
+        len += 1;
+        p++;
+      } while ('a' <= *p && *p <= 'z' || '0' <= *p && *p <= '9');
+      cur = cur->next = new_token(TK_IDENT, start, len);
       continue;
     }
 

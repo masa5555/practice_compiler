@@ -29,6 +29,17 @@ struct Token {
 Token *token;
 char *user_input;
 
+typedef struct LVar LVar;
+struct LVar {
+  LVar *next; // 次の変数かNULL
+  char *name; // 変数の名前
+  int len;
+  int offset; // RBPからのオフセット
+};
+
+//　ローカル変数の連結リスト
+LVar *locals;
+
 // エラー表示用
 void error(char *fmt, ...);
 void error_at(char *loc, char *fmt, ...);
@@ -37,7 +48,6 @@ void error_at(char *loc, char *fmt, ...);
 bool consume(char *op);
 void expect(char *op);
 int expect_number();
-char expect_ident();
 
 Token *tokenize();
 

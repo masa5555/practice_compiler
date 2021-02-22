@@ -4,9 +4,6 @@ void gen_lval(Node *node) {
   if (node->kind != ND_LVAR) {
     error("代入式の左辺値が変数でありません");
   }
-  if (node->offset == 0) {
-    error("offsetに正しく代入されていません");
-  }
   printf("  mov rax, rbp\n"); // rax = rbp
   printf("  sub rax, %d\n", node->offset); // rax(rsp) = rbp - offset 
   printf("  push rax\n");
@@ -24,7 +21,7 @@ void gen(Node *node) {
       return;
     case ND_ASSIGN:
       gen(node->rhs);
-      printf("pop rdi\n");
+      printf("  pop rdi\n");
 
       gen_lval(node->lhs);
       printf("  pop rax\n");

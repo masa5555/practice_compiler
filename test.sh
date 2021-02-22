@@ -44,8 +44,11 @@ assert 3 "1; 2; 3;"
 assert 1 "a = 1; a;"
 assert 4 "a = 4; c = 100; a;"
 assert 55 "a = d = 55; a;"
-
 assert 100 "a = 4; d = 5; c = 100; d = c; d;"
 assert 104 "a = 4; c = 100; a + c;"
+assert 100 "a = 1; b = 2; c = 100; b = c; a = b; a;"
+
+assert 2 "foo = 1; foo + foo ;"
+assert 20 "var1 = 1; var2 = 10; var1 = var2; var1 + var1;"
 
 echo OK

@@ -15,11 +15,32 @@ static Node *new_node_num(int val) {
   return node;
 }
 
-static Node *new_node_val(char ident) {
+static Node *new_node_val() {
   Node *node = calloc(1, sizeof(Node));
   node->kind = ND_LVAR;
-  node->offset = (ident - 'a' + 1) * 8;
   return node;
+}
+
+static LVar *new_lvar() {
+  LVar *lvar = calloc(1, sizeof(LVar));
+  lvar->next = locals;
+  lvar->name = token->str;
+  lvar->offset = (locals == NULL)? 0 : locals->offset + 8; 
+  lvar->len = token->len;
+  locals = lvar;
+  return lvar;
+}
+
+static LVar *find_lvar() {
+  for (LVar *var = locals; var; var = var->next) {
+    if (
+      var->len == token->len && 
+      !memcmp(token->str, var->name, var->len)
+    ){
+      return var;
+    }
+  }
+  return NULL;
 }
 
 void *program();
@@ -147,7 +168,14 @@ static Node *primary() {
   }
 
   if (token->kind == TK_IDENT) {
-    Node *node = new_node_val(expect_ident());
+    Node *node = new_node_val();
+    LVar *lvar = find_lvar();
+    if (!lvar) {
+      lvar = new_lvar();
+    }
+
+    token = token->next;
+    node->offset = lvar->offset;
     return node;
   }
 
