@@ -66,23 +66,42 @@ void *program(Node *code[]) {
   code[i] = NULL;
 }
 
-// statement = expr ";" | "return" expr ";"
+/*
+  statement = 
+    expr ";" |
+    "return" expr ";" |
+    "if" "(" expr ")" statement ("else" statement)?
+*/
 static Node *statement() {
   Node *node;
-  if (token->kind == TK_RETURN) {
-    token = token->next;
-    node = new_node(ND_RETURN, expr(), NULL);
-  } else {
-    node = expr();
-  }
-
-  if (!consume(";")) {
-    error_at(token->str, token->str, "';'ではないトークンです.");
+  
+  switch (token->kind) {
+    case TK_IF:
+      expect("if");
+      expect("(");
+      Node *cond = expr();
+      expect(")");
+      Node *if_branch = statement();
+      Node *else_branch = NULL;
+      if (consume("else")) {
+        else_branch = statement();
+      }
+      Node *branchs = new_node(ND_ELSE, if_branch, else_branch);
+      node = new_node(ND_IF, cond, branchs);
+      break;
+    case TK_RETURN:
+      expect("return");
+      node = new_node(ND_RETURN, expr(), NULL);
+      expect(";");
+      break;
+    default:
+      node = expr();
+      expect(";");
   }
   return node;
 }
 
-// expr = assign
+//s expr = assign
 static Node *expr() {
   return assign();
 }
@@ -191,5 +210,5 @@ static Node *primary() {
     return node;
   }
 
-  return new_node_num(expect_number());
+  return new_node_num(expect_number(token->str));
 }

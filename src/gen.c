@@ -1,6 +1,11 @@
 #include "9cc.h"
 
-void gen_lval(Node *node) {
+static int get_now_cnt(void) {
+  static int i = 1;
+  return i++;
+}
+
+static void gen_lval(Node *node) {
   if (node->kind != ND_LVAR) {
     error("代入式の左辺値が変数でありません");
   }
@@ -11,6 +16,26 @@ void gen_lval(Node *node) {
 
 void gen(Node *node) {
   switch (node->kind) {
+    case ND_IF:
+      gen(node->lhs); // condition
+      printf("  pop rax\n");
+      printf("  cmp rax, 0\n");
+      
+      int nc = get_now_cnt();
+      // elseがあるかどうかで分岐
+      if (node->rhs->rhs) {
+        printf("  je .Lelse%d\n", nc);
+        gen(node->rhs->lhs);
+        printf("  jmp .Lend%d\n", nc);
+        printf(".Lelse%d:\n", nc);
+        gen(node->rhs->rhs); 
+      } else {
+        printf("  je .Lend%d\n", nc);
+        gen(node->rhs->lhs);
+      }
+
+      printf(".Lend%d:\n", nc);
+      return;
     case ND_NUM:
       printf("  mov rax, %d\n", node->val);
       printf("  push rax\n");

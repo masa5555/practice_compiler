@@ -1,5 +1,41 @@
 #include "9cc.h"
 
+static bool is_2length_sign(char *p) {
+  return 
+    memcmp(p, "==", strlen("==")) == 0 ||
+    memcmp(p, "!=", strlen("!=")) == 0 ||
+    memcmp(p, "<=", strlen("<=")) == 0 ||
+    memcmp(p, ">=", strlen(">=")) == 0;
+}
+
+static bool is_avalable_char_in_var(char p) {
+  return 
+    ('a' <= p && p <= 'z') ||
+    ('A' <= p && p <= 'Z') ||
+    ('0' <= p && p <= '9') ||
+    (p == '_');
+}
+
+static TokenKind strToKind(char *str) {
+  if (
+    memcmp(str, "return", 6) == 0 && !is_avalable_char_in_var(str[6]) 
+  ) {
+    return TK_RETURN;
+  } else if (
+    memcmp(str, "if", 2) == 0 && !is_avalable_char_in_var(str[2]) 
+  ) {
+    return TK_IF;
+  } else if (memcmp(str, "else", 4) == 0 && !is_avalable_char_in_var(str[4]) ) {
+    return TK_ELSE;
+  } else if(
+    is_2length_sign(str) || strchr("+-*/()<>=;", str[0]) 
+  ) {
+    return TK_RESERVED;
+  }
+  
+  error("strToKind: '%s' にマッチする値がありません", str);
+}
+
 // エラー報告のための関数    
 // printfと同じ引数をとる
 // "..."は可変長引数
@@ -31,7 +67,7 @@ void error_at(char *input, char *loc, char *fmt, ...){
 // それ以外ならば、偽を返す。
 bool consume(char *op){
   if(
-    token->kind != TK_RESERVED ||
+    token->kind != strToKind(op) ||
     strlen(op) != token->len ||
     memcmp(token->str, op, token->len)
   ){
@@ -46,11 +82,11 @@ bool consume(char *op){
 // それ以外ならば、エラーを報告する。
 void expect(char *op){
   if(
-    token->kind != TK_RESERVED ||
+    token->kind != strToKind(op) ||
     strlen(op) != token->len ||
     memcmp(token->str, op, token->len)
   ){
-    error_at(token->str, "'%s'ではありません", op);
+    error_at(token->str, token->str, "'%s'ではありません", op);
   }
   token = token->next;
 }
@@ -73,22 +109,6 @@ static Token *new_token(TokenKind kind, char *str, int len){
   tok->str = str;
   tok->len = len;
   return tok;
-}
-
-static bool is_2length_sign(char *p) {
-  return 
-    memcmp(p, "==", strlen("==")) == 0 ||
-    memcmp(p, "!=", strlen("!=")) == 0 ||
-    memcmp(p, "<=", strlen("<=")) == 0 ||
-    memcmp(p, ">=", strlen(">=")) == 0;
-}
-
-static bool is_avalable_char_in_var(char p) {
-  return 
-    ('a' <= p && p <= 'z') ||
-    ('A' <= p && p <= 'Z') ||
-    ('0' <= p && p <= '9') ||
-    (p == '_');
 }
 
 // 入力文字列pをtokenizeしたものを返す
@@ -121,6 +141,24 @@ Token *tokenize(char *input){
     ) {
       cur = cur->next = new_token(TK_RETURN, p, 6);
       p += 6;
+      continue;
+    }
+    // TK_IF
+    if (
+      memcmp(p, "if", 2) == 0 &&
+      !is_avalable_char_in_var(p[2]) 
+    ) {
+      cur = cur->next = new_token(TK_IF, p, 2);
+      p += 2;
+      continue;
+    }
+    // TK_ELSE
+    if (
+      memcmp(p, "else", 4) == 0 &&
+      !is_avalable_char_in_var(p[4]) 
+    ) {
+      cur = cur->next = new_token(TK_ELSE, p, 4);
+      p += 4;
       continue;
     }
 

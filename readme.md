@@ -47,6 +47,12 @@ static宣言は外部ファイルで呼び出されないことを明示する
 ```
 statement = expr ";" | "return" expr ";"
 ```
+### 12. 制御構文
+- if
+- while
+- for
+- 3項演算子
+10.returnと同じようにstatementの構文に追加していく
 
 ### 注意
 テストの値は0~255の範囲で

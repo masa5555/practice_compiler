@@ -1,4 +1,4 @@
-CFLAGS=-std=c11 -g -static 
+CFLAGS=-std=c11 -fstack-protector -g -static 
 SRCS=$(wildcard src/*.c)
 OBJS=$(SRCS:src.c=.o)
 

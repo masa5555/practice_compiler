@@ -55,4 +55,8 @@ assert 9 "return 9;"
 assert 3 "return 1+1+1;"
 assert 10 "var1 = 10 * 5; return 10;"
 
+assert 10 "if ( 1 == 1 ) return 10;"
+assert 10 "if( 1 == 1 ) return 10; else return 0;"
+assert 0 "if( 1 != 1 ) return 10; else return 0;"
+
 echo OK

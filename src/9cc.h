@@ -11,6 +11,8 @@ typedef enum {
   TK_IDENT, // 識別子
   TK_NUM, // 整数token
   TK_RETURN,
+  TK_IF,
+  TK_ELSE,
   TK_EOF, // 入力の終わりを表すtoken
 } TokenKind;
 
@@ -48,6 +50,8 @@ typedef enum {
   ND_ASSIGN, // =
   ND_LVAR, // local variable
   ND_RETURN, // return
+  ND_IF, // if
+  ND_ELSE,
 } NodeKind;
 // 抽象構文木のノードの型
 typedef struct Node Node;
@@ -70,7 +74,7 @@ void gen(Node *node); // gen.c
 // parse.cで使う
 bool consume(char *op);
 void expect(char *op);
-int expect_number();
+int expect_number(char *input);
 
 // エラー表示用
 void error(char *fmt, ...);

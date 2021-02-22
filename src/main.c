@@ -8,7 +8,6 @@ int main(int argc, char **argv){
 
   // tokenizeし、連結リストを作る
   token = tokenize(argv[1]);
-
   // 文ごとに抽象構文木をつくる
   Node *code[100];
   program(code);
