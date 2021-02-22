@@ -66,10 +66,19 @@ void *program(Node *code[]) {
   code[i] = NULL;
 }
 
-// statement = expr ";"
+// statement = expr ";" | "return" expr ";"
 static Node *statement() {
-  Node *node = expr();
-  expect(";");
+  Node *node;
+  if (token->kind == TK_RETURN) {
+    token = token->next;
+    node = new_node(ND_RETURN, expr(), NULL);
+  } else {
+    node = expr();
+  }
+
+  if (!consume(";")) {
+    error_at(token->str, token->str, "';'ではないトークンです.");
+  }
   return node;
 }
 

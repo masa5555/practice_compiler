@@ -75,6 +75,22 @@ static Token *new_token(TokenKind kind, char *str, int len){
   return tok;
 }
 
+static bool is_2length_sign(char *p) {
+  return 
+    memcmp(p, "==", strlen("==")) == 0 ||
+    memcmp(p, "!=", strlen("!=")) == 0 ||
+    memcmp(p, "<=", strlen("<=")) == 0 ||
+    memcmp(p, ">=", strlen(">=")) == 0;
+}
+
+static bool is_avalable_char_in_var(char p) {
+  return 
+    ('a' <= p && p <= 'z') ||
+    ('A' <= p && p <= 'Z') ||
+    ('0' <= p && p <= '9') ||
+    (p == '_');
+}
+
 // 入力文字列pをtokenizeしたものを返す
 Token *tokenize(char *input){
   char *p = input;
@@ -83,12 +99,13 @@ Token *tokenize(char *input){
   Token *cur = &head;
 
   while(*p){
-    // 空白文字　スキップ
+    // 空白文字をスキップ
     if (isspace(*p)) {
       p++;
       continue;
     }
-
+    
+    // TK_NUM
     if (isdigit(*p)) {
       cur = cur->next = new_token(TK_NUM, p, 0); // valとlenは後で代入
       char *q = p;
@@ -96,29 +113,35 @@ Token *tokenize(char *input){
       cur->len = p - q;
       continue;
     }
+    
+    // TK_RETURN
+    if (
+      memcmp(p, "return", 6) == 0 &&
+      !is_avalable_char_in_var(p[6]) 
+    ) {
+      cur = cur->next = new_token(TK_RETURN, p, 6);
+      p += 6;
+      continue;
+    }
 
+    // TK_IDENT
     if ('a' <= *p && *p <= 'z') {
       char *start = p;
       int len = 0;
       do {
         len += 1;
         p++;
-      } while ('a' <= *p && *p <= 'z' || '0' <= *p && *p <= '9');
+      } while (is_avalable_char_in_var(*p));
       cur = cur->next = new_token(TK_IDENT, start, len);
       continue;
     }
 
-    if (
-      memcmp(p, "==", strlen("==")) == 0 ||
-      memcmp(p, "!=", strlen("!=")) == 0 ||
-      memcmp(p, "<=", strlen("<=")) == 0 ||
-      memcmp(p, ">=", strlen(">=")) == 0 
-    ){
+    // TK_RESERVED
+    if (is_2length_sign(p)){
       cur = cur->next = new_token(TK_RESERVED, p, 2);
       p += 2;
       continue;
     }
-
     if (strchr("+-*/()<>=;", *p)) {
       cur = cur->next = new_token(TK_RESERVED, p++, 1); //代入してからp進める
       continue;
@@ -127,6 +150,7 @@ Token *tokenize(char *input){
     error_at(input, p, "tokenizeできません");
   }
 
+  // TK_EOF
   cur = cur->next = new_token(TK_EOF, p, 0);
   return head.next;
 }

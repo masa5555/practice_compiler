@@ -51,4 +51,8 @@ assert 100 "a = 1; b = 2; c = 100; b = c; a = b; a;"
 assert 2 "foo = 1; foo + foo ;"
 assert 20 "var1 = 1; var2 = 10; var1 = var2; var1 + var1;"
 
+assert 9 "return 9;"
+assert 3 "return 1+1+1;"
+assert 10 "var1 = 10 * 5; return 10;"
+
 echo OK
