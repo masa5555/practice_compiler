@@ -7,9 +7,11 @@ int main(int argc, char **argv){
   }
 
   // tokenizeし、連結リストを作る
-  user_input = argv[1];
-  token = tokenize();
-  program();
+  token = tokenize(argv[1]);
+
+  // 文ごとに抽象構文木をつくる
+  Node *code[100];
+  program(code);
   
   // アセンブラのヘッダー部分
   printf(".intel_syntax noprefix\n");

@@ -1,5 +1,8 @@
 #include "9cc.h"
 
+//　ローカル変数の連結リスト
+LVar *locals;
+
 static Node *new_node(NodeKind kind, Node *lhs, Node *rhs) {
   Node *node = calloc(1, sizeof(Node)); // Node一個分のサイズのメモリ確保
   node->kind = kind;
@@ -55,7 +58,7 @@ static Node *unary();
 static Node *primary();
 
 // program = statement*
-void *program() {
+void *program(Node *code[]) {
   int i = 0;
   while (token->kind != TK_EOF) {
     code[i++] = statement();

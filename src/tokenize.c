@@ -12,13 +12,13 @@ void error(char *fmt, ...){
 }
 
 // エラー箇所を表示する
-void error_at(char *loc, char *fmt, ...){
+void error_at(char *input, char *loc, char *fmt, ...){
   va_list ap;
   va_start(ap, fmt);
 
   // 変更部分
-  int pos = loc - user_input;
-  fprintf(stderr, "%s\n", user_input);
+  int pos = loc - input;
+  fprintf(stderr, "%s\n", input);
   fprintf(stderr, "%*s", pos, ""); //空白で列合わせる
   fprintf(stderr, "^ "); 
 
@@ -57,9 +57,9 @@ void expect(char *op){
 
 // 次のtokenが数値ならば、tokenを１つ読み進めてその数値を返す。
 // それ以外ならば、エラーを報告する。
-int expect_number(){
+int expect_number(char *input){
   if(token->kind != TK_NUM){
-    error_at(token->str, "数値ではありません");
+    error_at(input, token->str, "数値ではありません");
   }
   int val = token->val;
   token = token->next;
@@ -76,8 +76,8 @@ static Token *new_token(TokenKind kind, char *str, int len){
 }
 
 // 入力文字列pをtokenizeしたものを返す
-Token *tokenize(){
-  char *p = user_input;
+Token *tokenize(char *input){
+  char *p = input;
   Token head;
   head.next = NULL;
   Token *cur = &head;
@@ -124,7 +124,7 @@ Token *tokenize(){
       continue;
     }
 
-    error_at(p, "tokenizeできません");
+    error_at(input, p, "tokenizeできません");
   }
 
   cur = cur->next = new_token(TK_EOF, p, 0);

@@ -5,8 +5,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-// tokenize
-
 // token の種類
 typedef enum {
   TK_RESERVED, // 記号 = {+, -, *, /, (, ), ==, !=, <, >, <=, >=, =}
@@ -25,10 +23,7 @@ struct Token {
   int len; // tokenの長さ
 };
 
-// 現在着目しているtoken
-Token *token;
-char *user_input;
-
+// ローカル変数の型
 typedef struct LVar LVar;
 struct LVar {
   LVar *next; // 次の変数かNULL
@@ -37,21 +32,6 @@ struct LVar {
   int offset; // RBPからのオフセット
 };
 
-//　ローカル変数の連結リスト
-LVar *locals;
-
-// エラー表示用
-void error(char *fmt, ...);
-void error_at(char *loc, char *fmt, ...);
-
-// parse.cでも使う
-bool consume(char *op);
-void expect(char *op);
-int expect_number();
-
-Token *tokenize();
-
-// parse
 typedef enum {
   ND_ADD, // +
   ND_SUB, // -
@@ -67,7 +47,6 @@ typedef enum {
   ND_ASSIGN, // =
   ND_LVAR, // local variable
 } NodeKind;
-
 // 抽象構文木のノードの型
 typedef struct Node Node;
 struct Node {
@@ -78,8 +57,19 @@ struct Node {
   int offset; // kindがND_LVARのときのみ使う
 };
 
-Node *code[100];
-void *program();
+// 現在着目しているtoken(グローバル変数)
+Token *token;
 
-// gen
-void gen(Node *node);
+// main関数で呼び出す関数
+Token *tokenize(); // tokenize.c
+void *program(); // parse.c
+void gen(Node *node); // gen.c
+
+// parse.cで使う
+bool consume(char *op);
+void expect(char *op);
+int expect_number();
+
+// エラー表示用
+void error(char *fmt, ...);
+void error_at(char *input, char *loc, char *fmt, ...);
